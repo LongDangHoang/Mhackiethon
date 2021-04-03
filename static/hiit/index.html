@@ -55,7 +55,7 @@
                 <h3 id="Player-ID" class="heading-6">Player 2: </h3>
                 <h3 id="Exercise" class="heading-5 w-node-_6127cee6-3ab9-3aad-f652-c339ceede146-a20c2e40">Your Friend
                 </h3>
-                <h3></h3>
+                <h3 id='friendStatus' class="heading-5 w-node-_6127cee6-3ab9-3aad-f652-c339ceede146-a20c2e40"></h3>
             </div>
         </div>
     </div>
@@ -88,6 +88,21 @@
                 </div>
             </div>
             <div>Copyright © 2021 M&amp;M's Fitness Studio. All rights reserved.</div>
+            <!-- MODAL LOGIN DIV -->
+            <div style='display: block; position: fixed; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgb(0,0,0); background-color: rgba(0, 0, 0, 0.4);'
+                id='modalLogin'>
+                <div style='display: flex; align-content: center; justify-content: center; background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%'>
+                    <form action='/connect/' method='POST' id='loginForm'>
+                        <label for="room">Enter your room code: </label>
+                        <input type='text' name='room' value="3" default="3" style='margin: 10px 0px 15px 0px'/>
+                        <label for="name">Enter your name: </label>
+                        <input type='text' name='name' style='margin: 10px 0px 10px 0px'/>
+                        <br>
+                        <input type='submit' id='submitButton' value='submit' />
+                    </form>
+                </div>
+            </div>
+            <!-- END MODAL LOGIN DIV -->
         </div>
     </footer>
     <script src="./HIIT_files/jquery-3.5.1.min.dc5e7f18c8.js" type="text/javascript"
@@ -97,6 +112,44 @@
     <a class="w-webflow-badge" href="https://webflow.com/?utm_campaign=brandjs"><img
             src="./HIIT_files/webflow-badge-icon.f67cd735e3.svg" alt="" style="margin-right: 8px; width: 16px;"><img
             src="./HIIT_files/webflow-badge-text.6faa6a38cd.svg" alt="Made in Webflow"></a>
+    <script src='/socket.io/socket.io.js'></script>
+    <script type='text/javascript'>
+
+        var socket = io();
+        var form = document.getElementById('loginForm');
+        var username;
+        var room;
+        var socketID; // your unique id
+
+        form.onsubmit = (e) => {
+            e.preventDefault(); // prevent reload
+            socket.emit("join room", {
+                username: form.elements.name.value,
+                roomName: form.elements.room.value
+            });
+            let modal = document.getElementById('modalLogin');
+            modal.style.display = "none";
+            username = form.elements.name.value;
+            room = form.elements.room.value;
+        }
+
+        socket.on("send data", (data) => {
+            console.log(data);
+            socketID = data.id;
+        });
+
+        socket.on("wait other", (data) => {
+            let status = document.getElementById('friendStatus');
+            status.innerHTML = 'Waiting for other player...';
+        });
+
+        socket.on("start task", (data) => {
+            // display user2 name and status
+            console.log(data.user1);
+            console.log(data.user2); 
+        });
+
+    </script>
 </body>
 
 </html>

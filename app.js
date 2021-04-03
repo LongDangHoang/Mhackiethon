@@ -36,6 +36,7 @@ app.use(bodyParser.urlencoded());
 // }
 
 let thisRoom = "";
+let numClients = {};
 io.on("connection", (socket) => {
     console.log("connected");
 
@@ -44,33 +45,59 @@ io.on("connection", (socket) => {
         console.log("Recieved some info!");
         console.log('in room');
         let newUser = joinUser(socket.id, data.username, data.roomName);
+        
         socket.emit('send data', {
             id: socket.id,
             username: newUser.username,
             roomName: newUser.roomName
-        })
+        });
         thisRoom = newUser.roomName;
         console.log(newUser);
+        
+        let startTask = false;
+        if (numClients[thisRoom] == undefined) {
+            numClients[thisRoom] = {
+                count: 1,
+                user1: newUser
+            }
+            // send data of waiting
+            socket.emit('wait other', {});
+        } else {
+            numClients[thisRoom].count += 1;
+            numClients[thisRoom].user2 = newUser;
+            // send data of both users:
+            startTask = true;
+        }
         socket.join(newUser.roomName);
+        if (startTask == true) {
+            io.to(thisRoom).emit('start task', {
+                user1: numClients[thisRoom].user1,
+                user2: numClients[thisRoom].user2
+            });
+        }
     });
 });
 
 app.get('/', (req, res) => {
-    res.redirect('/login/');
+    res.redirect('/home/');
 });
 
 app.use('/home/', express.static(path.join(__dirname, "static/homepage/")));
 app.use('/hiit/', express.static(path.join(__dirname, "static/hiit/")));
 
-app.get('/login/', (req, res) => {
-    res.sendFile(path.join(__dirname, '/static/login/login.html'))
-});
+// app.get('/login/', (req, res) => {
+//     res.sendFile(path.join(__dirname, '/static/login/login.html'))
+// });
 
 app.post('/connect/', (req, res) => {
     // create user with name and add them to room code
     console.log(req.body);
-    res.redirect('/home');
+    var roomName = req.body.rooomName;
 });
+
+// app.get('/hiit/', (req, res) => {
+    
+// });
 
 
 

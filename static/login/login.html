@@ -2,22 +2,22 @@
     <head>
     </head>
     <body>
-        <section style='display: flex; align-content: center; justify-content: center'>
-            <form action='/connect/' method='POST' id='loginForm'>
-                <label for="room">Enter your room code: </label>
-                <br>
-                <input type='text' name='room' value="3" default="3"/>
-                <br>
-                <label for="name">Enter your name: </label>
-                <br>
-                <input type='text' name='name'/>
-                <br>
-                <input type='submit' id='submitButton' value='submit' />
-            </form>
-        </section>
+        <div style='display: block; position: fixed; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgb(0,0,0); background-color: rgba(0, 0, 0, 0.2);'
+            id='modalLogin'>
+            <div style='display: flex; align-content: center; justify-content: center; background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%'>
+                <form action='/connect/' method='POST' id='loginForm'>
+                    <label for="room">Enter your room code: </label>
+                    <input type='text' name='room' value="3" default="3" style='margin: 10px 0px 10px 0px'/>
+                    <label for="name">Enter your name: </label>
+                    <input type='text' name='name' style='margin: 10px 0px 10px 0px'/>
+                    <input type='submit' id='submitButton' value='submit' />
+                </form>
+            </div>
+        </div>
     </body>
     <script src='/socket.io/socket.io.js'></script>
     <script type='text/javascript'>
+
         var socket = io();
         var form = document.getElementById('loginForm');
         console.log(form);
@@ -26,8 +26,14 @@
                 username: form.elements.name.value,
                 roomName: form.elements.room.value
             });
+            let modal = document.getElementById('modal');
+            modal.style.display = "none";
             console.log(form.elements.name.value);
             console.log(form.elements.room.value);
         }
+
+        socket.on("send data", (data) => {
+            console.log(data);
+        });
     </script>
 </html>
