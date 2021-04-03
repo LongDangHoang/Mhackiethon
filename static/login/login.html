@@ -1,0 +1,33 @@
+<html>
+    <head>
+    </head>
+    <body>
+        <section style='display: flex; align-content: center; justify-content: center'>
+            <form action='/connect/' method='POST' id='loginForm'>
+                <label for="room">Enter your room code: </label>
+                <br>
+                <input type='text' name='room' value="3" default="3"/>
+                <br>
+                <label for="name">Enter your name: </label>
+                <br>
+                <input type='text' name='name'/>
+                <br>
+                <input type='submit' id='submitButton' value='submit' />
+            </form>
+        </section>
+    </body>
+    <script src='/socket.io/socket.io.js'></script>
+    <script type='text/javascript'>
+        var socket = io();
+        var form = document.getElementById('loginForm');
+        console.log(form);
+        form.onsubmit = () => {
+            socket.emit("join room", {
+                username: form.elements.name.value,
+                roomName: form.elements.room.value
+            });
+            console.log(form.elements.name.value);
+            console.log(form.elements.room.value);
+        }
+    </script>
+</html>
