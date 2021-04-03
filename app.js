@@ -60,7 +60,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/home/', express.static(path.join(__dirname, "static/homepage/")));
-app.use('/connect/', express.static(path.join(__dirname, "static/homepage/")));
+app.use('/hiit/', express.static(path.join(__dirname, "static/hiit/")));
 
 app.get('/login/', (req, res) => {
     res.sendFile(path.join(__dirname, '/static/login/login.html'))
@@ -69,6 +69,7 @@ app.get('/login/', (req, res) => {
 app.post('/connect/', (req, res) => {
     // create user with name and add them to room code
     console.log(req.body);
+    res.redirect('/home');
 });
 
 
