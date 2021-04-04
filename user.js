@@ -18,4 +18,13 @@ function removeUser(id) {
     }
 }
 
-module.exports = { joinUser, removeUser }
+function findRoom(id) {
+    // return room of user with id
+    const getID = users => users.socketID === id;
+    const index =users.findIndex(getID);
+    if (index !== -1) {
+        return users[index].roomName;
+    }
+}
+
+module.exports = { joinUser, removeUser, findRoom }

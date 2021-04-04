@@ -1,25 +1,34 @@
 var express = require('express');
 // var firebase = require('firebase/app');
 // require('firebase/auth');
+
+var twilioConfig = require('./twilio_config');
+var twilio = require('twilio')(twilioConfig.accSid, twilioConfig.accSecret);
+var AccessToken = require('twilio').jwt.AccessToken;
+var VideoGrant = AccessToken.VideoGrant;
+
 var bodyParser = require('body-parser');
-var multer = require('multer'); // parse form-datea
 var path = require('path');
-const {joinUser, removeUser} = require('./user.js');
-const e = require('express');
+const {joinUser, removeUser, findRoom} = require('./user.js');
 
 var app = express();
 var http = require('http').createServer(app);
 var io = require("socket.io")(http);
-// var upload = multer();
 
-// firebase.initialzeApp({
-//     apiKey: "AIzaSyA5NhmYW7Q-ftU9hS5a6w9_TQDZXRNjMig",
-//     authDomain: "mhackiethon.firebaseapp.com",
-//     projectId: "mhackiethon",
-//     storageBucket: "mhackiethon.appspot.com",
-//     messagingSenderId: "1073593514181",
-//     appId: "1:1073593514181:web:b8283c5c1ddcb7f90a18ac"  
-// })
+function createTwilioToken(username, roomName) {
+    const token = new AccessToken(
+        twilioConfig.accSid, 
+        twilioConfig.keySid, 
+        twilioConfig.keySecret,
+        {
+            identity: username,
+            ttl: 14400
+        });
+    const grant = new VideoGrant({room: roomName});
+    token.addGrant(grant);
+    console.log("Access token for user %s is %s", username, token.toJwt());
+    return token.toJwt();
+}
 
 // const auth = firebase.auth();
 
@@ -66,6 +75,7 @@ io.on("connection", (socket) => {
             }
             // send data of waiting
             socket.emit('wait other', {});
+
         } else if (roomData[thisRoom].user2 == undefined) {
             roomData[thisRoom].count += 1;
             roomData[thisRoom].user2 = newUser;
@@ -74,12 +84,32 @@ io.on("connection", (socket) => {
         }
         socket.join(newUser.roomName);
         if (startTask == true) {
+        // initialize a twilio room video call            
+            twilio.video.rooms.create({
+                uniqueName: thisRoom + String(Math.floor(Date.now() / 1000)),
+                type: 'go'
+            }).then(room => {
+                    console.log("Room created: " + String(room.sid));
+                    socket.emit('start call', {
+                        roomID: room.sid,
+                        accToken: createTwilioToken(newUser.username, room.sid)
+                    });
+                    // send to friend as well
+                    socket.broadcast.to(roomData[thisRoom].user1.socketID).emit('start call', {
+                        roomID: room.sid,
+                        accToken: createTwilioToken(roomData[thisRoom].user1.username, room.sid)
+                    });
+                    // record twilio room in socket room
+                    roomData[thisRoom].roomID = room.sid;
+                });
+
             io.to(thisRoom).emit('start task', {
                 taskNumber: roomData[thisRoom].taskNumber,
                 user1: roomData[thisRoom].user1,
                 user2: roomData[thisRoom].user2
             });
         }
+            
     });
 
     // task events
@@ -113,13 +143,24 @@ io.on("connection", (socket) => {
                 });
             }
         }
-    
-    // end
-    socket.on('end', () => {
-        socket.disconnect(0);
-    });
 
     });
+
+    // end
+    socket.on('end', (data) => {
+        removeUser(data.id);
+        socket.disconnect(0);
+        twilio.video.rooms(data.roomID)
+                    .update({status: 'completed'});
+    });
+
+    socket.on('disconnect', () => {
+        roomName = findRoom(socket.id);
+        twilio.video.rooms(roomData[roomName].roomID)
+                    .update({status: 'completed'});
+        removeUser(socket.id);
+    });
+
 });
 
 app.get('/', (req, res) => {
