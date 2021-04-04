@@ -186,11 +186,10 @@ io.on("connection", (socket) => {
         }
         console.log("User %s - id %s disconnects!", u.username, socket.id);
         if (roomData[roomName] != undefined) {
+            delete roomData[roomName];
+            console.log('%s is deleted', roomName);
             twilio.video.rooms(roomData[roomName].roomID)
                         .update({status: 'completed'});
-        } else {
-            // roomData[roomName] = undefined;
-            delete roomData[roomName];
         }
     });
 
