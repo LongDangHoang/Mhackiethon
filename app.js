@@ -123,18 +123,18 @@ io.on("connection", (socket) => {
                     // record twilio room in socket room
                     roomData[thisRoom].roomID = room.sid;
 
-                    io.to(thisRoom).emit('start task', {
-                        taskNumber: roomData[thisRoom].taskNumber,
-                        user1: roomData[thisRoom].user1,
-                        user2: roomData[thisRoom].user2
-                    });
+                    // io.to(thisRoom).emit('start task', {
+                    //     taskNumber: roomData[thisRoom].taskNumber,
+                    //     user1: roomData[thisRoom].user1,
+                    //     user2: roomData[thisRoom].user2
+                    // });
             });
 
-            // io.to(thisRoom).emit('start task', {
-            //     taskNumber: roomData[thisRoom].taskNumber,
-            //     user1: roomData[thisRoom].user1,
-            //     user2: roomData[thisRoom].user2
-            // });
+            io.to(thisRoom).emit('start task', {
+                taskNumber: roomData[thisRoom].taskNumber,
+                user1: roomData[thisRoom].user1,
+                user2: roomData[thisRoom].user2
+            });
         }
             
     });
@@ -179,11 +179,12 @@ io.on("connection", (socket) => {
     });
 
     socket.on('disconnect', () => {
-        roomName = findRoom(socket.id);
+        let u = removeUser(socket.id);
+        roomName = u.roomName;
         if (roomName == undefined) {
             console.log("roomName is undefined for some reason");
         }
-        console.log("User %s disconnects!", socket.id);
+        console.log("User %s - id %s disconnects!", u.username, socket.id);
         if (roomData[roomName] != undefined) {
             twilio.video.rooms(roomData[roomName].roomID)
                         .update({status: 'completed'});
@@ -191,7 +192,6 @@ io.on("connection", (socket) => {
             // roomData[roomName] = undefined;
             delete roomData[roomName];
         }
-        removeUser(socket.id);
     });
 
 });
