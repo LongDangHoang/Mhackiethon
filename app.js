@@ -195,6 +195,7 @@ io.on("connection", (socket) => {
 });
 
 app.get('/', (req, res) => {
+    console.log('Account id for twilio is %s', twilioConfig.accSid);
     res.redirect('/home/');
 });
 
