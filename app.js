@@ -2,7 +2,17 @@ var express = require('express');
 // var firebase = require('firebase/app');
 // require('firebase/auth');
 
-var twilioConfig = require('./twilio_config');
+let twilioConfig;
+try {
+    twilioConfig = require('./twilio_config');
+} catch {
+    twilioConfig = {
+        accSid: process.env.TWILIO_ACCSID,
+        keySid: process.env.TWILIO_KEYSID,
+        accSecret: process.env.TWILIO_ACCSECRET,
+        keySecret: process.env.TWILIO_KEYSECRET
+    }
+}
 var twilio = require('twilio')(twilioConfig.accSid, twilioConfig.accSecret);
 var AccessToken = require('twilio').jwt.AccessToken;
 var VideoGrant = AccessToken.VideoGrant;
