@@ -180,10 +180,11 @@ io.on("connection", (socket) => {
 
     socket.on('disconnect', () => {
         let u = removeUser(socket.id);
-        roomName = u.roomName;
-        if (roomName == undefined) {
-            console.log("roomName is undefined for some reason");
+        if (u == undefined) {
+            console.log('User with socket id %s cannot be found', socket.id);
+            return;
         }
+        roomName = u.roomName;
         console.log("User %s - id %s disconnects!", u.username, socket.id);
         if (roomData[roomName] != undefined) {
             twilio.video.rooms(roomData[roomName].roomID)
