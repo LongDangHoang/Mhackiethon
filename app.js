@@ -163,18 +163,21 @@ io.on("connection", (socket) => {
     socket.on('end', (data) => {
         removeUser(data.id);
         socket.disconnect(0);
-        roomData[roomName] = undefined;
+        // roomData[roomName] = undefined;
+        delete roomData[data.roomName];
         twilio.video.rooms(data.roomID)
                     .update({status: 'completed'});
     });
 
     socket.on('disconnect', () => {
         roomName = findRoom(socket.id);
+        console.log("User %s disconnects!", socket.id);
         if (roomData[roomName] != undefined) {
             twilio.video.rooms(roomData[roomName].roomID)
                         .update({status: 'completed'});
         } else {
-            roomData[roomName] = undefined;
+            // roomData[roomName] = undefined;
+            delete roomData[data.roomName];
         }
         removeUser(socket.id);
     });
