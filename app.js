@@ -107,7 +107,8 @@ io.on("connection", (socket) => {
             twilio.video.rooms.create({
                 uniqueName: thisRoom + String(Math.floor(Date.now() / 1000)),
                 type: 'go',
-                statusCallback: '/debug/'
+                statusCallback: '/debug/',
+                statusCallbackMethod: 'POST'
             }).then(room => {
                     console.log("Room created: " + String(room.sid));
                     socket.emit('start call', {
