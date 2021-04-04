@@ -153,6 +153,7 @@ io.on("connection", (socket) => {
     socket.on('end', (data) => {
         removeUser(data.id);
         socket.disconnect(0);
+        roomData[roomName] = undefined;
         twilio.video.rooms(data.roomID)
                     .update({status: 'completed'});
     });
@@ -162,6 +163,8 @@ io.on("connection", (socket) => {
         if (roomData[roomName] != undefined) {
             twilio.video.rooms(roomData[roomName].roomID)
                         .update({status: 'completed'});
+        } else {
+            roomData[roomName] = undefined;
         }
         removeUser(socket.id);
     });
