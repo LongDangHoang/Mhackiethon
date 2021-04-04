@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 var multer = require('multer'); // parse form-datea
 var path = require('path');
 const {joinUser, removeUser} = require('./user.js');
+const e = require('express');
 
 var app = express();
 var http = require('http').createServer(app);
@@ -36,7 +37,8 @@ app.use(bodyParser.urlencoded());
 // }
 
 let thisRoom = "";
-let numClients = {};
+let roomData = {};
+
 io.on("connection", (socket) => {
     console.log("connected");
 
@@ -55,26 +57,68 @@ io.on("connection", (socket) => {
         console.log(newUser);
         
         let startTask = false;
-        if (numClients[thisRoom] == undefined) {
-            numClients[thisRoom] = {
+        if (roomData[thisRoom] == undefined) {
+            roomData[thisRoom] = {
+                taskNumber: 1, // which task 
+                taskProgress: 0, // how many people have completed task
                 count: 1,
                 user1: newUser
             }
             // send data of waiting
             socket.emit('wait other', {});
-        } else {
-            numClients[thisRoom].count += 1;
-            numClients[thisRoom].user2 = newUser;
+        } else if (roomData[thisRoom].user2 == undefined) {
+            roomData[thisRoom].count += 1;
+            roomData[thisRoom].user2 = newUser;
             // send data of both users:
             startTask = true;
         }
         socket.join(newUser.roomName);
         if (startTask == true) {
             io.to(thisRoom).emit('start task', {
-                user1: numClients[thisRoom].user1,
-                user2: numClients[thisRoom].user2
+                taskNumber: roomData[thisRoom].taskNumber,
+                user1: roomData[thisRoom].user1,
+                user2: roomData[thisRoom].user2
             });
         }
+    });
+
+    // task events
+    socket.on("complete task", (data) => {
+        // extract vars
+        let username = data.username;
+        let roomName = data.roomName;
+        let socketID = data.id;
+
+        let taskProgress = roomData[roomName].taskProgress;
+        let user1 = roomData[roomName].user1;
+        let user2 = roomData[roomName].user2;
+
+        if (taskProgress == 0) {
+            roomData[roomName].taskProgress += 1;
+            // find friend id
+            if (user1.socketID == socketID)
+                socket.broadcast.to(user2.socketID).emit("other complete task", {});
+            else
+                socket.broadcast.to(user1.socketID).emit("other complete task", {});
+        } else {
+            roomData[roomName].taskProgress = 0;
+            roomData[roomName].taskNumber += 1; // move on to next task
+            if (roomData[roomName].taskNumber > 3) {
+                io.to(roomName).emit('all complete', {});
+            } else {
+                io.to(roomName).emit('start task', {
+                    taskNumber: roomData[roomName].taskNumber,
+                    user1: user1,
+                    user2: user2
+                });
+            }
+        }
+    
+    // end
+    socket.on('end', () => {
+        socket.disconnect(0);
+    });
+
     });
 });
 

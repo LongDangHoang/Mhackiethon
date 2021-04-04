@@ -43,17 +43,18 @@
             <h1 class="heading-4">HIGH INTENSITY - HIIT</h1>
             <div class="w-layout-grid grid-2">
                 <h3 id="Exercise" class="heading-6">Exercise: </h3>
-                <h3 id="Exercise-type" class="heading-5"> 20 Push up burpees</h3><img
+                <h3 id="Exercise-type" class="heading-5">Read this after you friend joins!</h3><img
                     src="./HIIT_files/placeholder.60f9b1840c.svg" loading="lazy"
                     id="w-node-bb5bdae8-12cd-1c9c-74fe-efb514c3e7ea-a20c2e40" alt="">
             </div>
             <div class="w-layout-grid grid-3">
                 <h3 id="Player-ID" class="heading-6">Player 1: </h3>
-                <h3 id="Exercise" class="heading-5 w-node-_6127cee6-3ab9-3aad-f652-c339ceede140-a20c2e40">You</h3><a
+                <h3 id="Exercise" class="heading-5 w-node-_6127cee6-3ab9-3aad-f652-c339ceede140-a20c2e40">You</h3>
+                <a
                     id="w-node-_6127cee6-3ab9-3aad-f652-c339ceede142-a20c2e40"
-                    href="https://hackiethon-homepage.webflow.io/hiit#" class="button-5 w-button">COMPLETED</a>
+                    href="https://hackiethon-homepage.webflow.io/hiit#" class="button-5 w-button">COMPLETE</a>
                 <h3 id="Player-ID" class="heading-6">Player 2: </h3>
-                <h3 id="Exercise" class="heading-5 w-node-_6127cee6-3ab9-3aad-f652-c339ceede146-a20c2e40">Your Friend
+                <h3 id="friendName" class="heading-5 w-node-_6127cee6-3ab9-3aad-f652-c339ceede146-a20c2e40">Your Friend
                 </h3>
                 <h3 id='friendStatus' class="heading-5 w-node-_6127cee6-3ab9-3aad-f652-c339ceede146-a20c2e40"></h3>
             </div>
@@ -116,10 +117,22 @@
     <script type='text/javascript'>
 
         var socket = io();
-        var form = document.getElementById('loginForm');
         var username;
         var room;
         var socketID; // your unique id
+
+        var friendStatus = document.getElementById('friendStatus');
+        var friendName = document.getElementById('friendName');
+
+        var form = document.getElementById('loginForm');
+        var completeButton = document.getElementById("w-node-_6127cee6-3ab9-3aad-f652-c339ceede142-a20c2e40");
+        var exerciseType = document.getElementById('Exercise-type');
+
+        // flag
+        var waitFlag = false;
+
+        // hard code task value
+        var tasks = ['20 Mountain Climbers', '3 High Plank Chest Taps (15 on each side)', '20 Squat Jumps', '30 Jumping Lunges (15 on each leg)'];
 
         form.onsubmit = (e) => {
             e.preventDefault(); // prevent reload
@@ -133,20 +146,57 @@
             room = form.elements.room.value;
         }
 
+        completeButton.onclick = (e) => {
+            e.preventDefault(); // prevent potential reload or refresh page
+            // emit complete task event
+            if (waitFlag == false) {
+                socket.emit("complete task", {
+                    username: username,
+                    roomName: room,
+                    id: socketID
+                });
+                completeButton.innerHTML = 'I AM DONE!';
+                waitFlag = true;
+            }
+        }
+
+        // socket events handlers
         socket.on("send data", (data) => {
             console.log(data);
             socketID = data.id;
         });
 
         socket.on("wait other", (data) => {
-            let status = document.getElementById('friendStatus');
-            status.innerHTML = 'Waiting for other player...';
+            waitFlag = true;
+            friendStatus.innerHTML = 'Waiting for other player...';
         });
 
         socket.on("start task", (data) => {
+            // reset flag
+            waitFlag = false;
+            completeButton.innerHTML = 'COMPLETE';
+
             // display user2 name and status
             console.log(data.user1);
             console.log(data.user2); 
+            
+            if (data.user1.username == username)
+                friendName.innerHTML = data.user2.username;
+            else
+                friendName.innerHTML = data.user1.username;
+
+            exerciseType.innerHTML = tasks[data.taskNumber - 1]; 
+            friendStatus.innerHTML = 'Huff... Huff...';
+        });
+
+        socket.on("other complete task", (data) => {
+            friendStatus.innerHTML = 'I am done!';
+        });
+
+        socket.on("all complete", () => {
+            friendStatus.innerHTML = 'I HAVE COMPLETED!';
+            exerciseType.innerHTML = 'Congratulations! You completed the exercise! You burn 9999 calories!';
+            socket.emit('end');
         });
 
     </script>
