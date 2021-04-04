@@ -5,14 +5,19 @@ var express = require('express');
 let twilioConfig;
 try {
     twilioConfig = require('./twilio_config');
+    console.log('Successfully load config');
 } catch {
+    console.log('Instantiating config');
     twilioConfig = {
         accSid: process.env.TWILIO_ACCSID,
         keySid: process.env.TWILIO_KEYSID,
         accSecret: process.env.TWILIO_ACCSECRET,
         keySecret: process.env.TWILIO_KEYSECRET
     }
+} finally {
+    console.log('Account SID is %s', twilioConfig.accSid);
 }
+
 var twilio = require('twilio')(twilioConfig.accSid, twilioConfig.accSecret);
 var AccessToken = require('twilio').jwt.AccessToken;
 var VideoGrant = AccessToken.VideoGrant;
