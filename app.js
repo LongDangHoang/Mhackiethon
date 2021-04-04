@@ -106,7 +106,8 @@ io.on("connection", (socket) => {
             console.log('Twilio is running');
             twilio.video.rooms.create({
                 uniqueName: thisRoom + String(Math.floor(Date.now() / 1000)),
-                type: 'go'
+                type: 'go',
+                statusCallback: '/debug/'
             }).then(room => {
                     console.log("Room created: " + String(room.sid));
                     socket.emit('start call', {
@@ -214,9 +215,9 @@ app.post('/connect/', (req, res) => {
             res.send("Only two people can use this workout adventure at any time!");
 });
 
-// app.get('/hiit/', (req, res) => {
-    
-// });
+app.post('/debug/', (req, res) => {
+    console.log(req.body);
+});
 
 
 
