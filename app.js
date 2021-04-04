@@ -81,7 +81,10 @@ io.on("connection", (socket) => {
             roomData[thisRoom].user2 = newUser;
             // send data of both users:
             startTask = true;
+        } else {
+            return;
         }
+
         socket.join(newUser.roomName);
         if (startTask == true) {
         // initialize a twilio room video call            
@@ -156,8 +159,10 @@ io.on("connection", (socket) => {
 
     socket.on('disconnect', () => {
         roomName = findRoom(socket.id);
-        twilio.video.rooms(roomData[roomName].roomID)
-                    .update({status: 'completed'});
+        if (roomData[roomName] != undefined) {
+            twilio.video.rooms(roomData[roomName].roomID)
+                        .update({status: 'completed'});
+        }
         removeUser(socket.id);
     });
 
@@ -177,7 +182,9 @@ app.use('/hiit/', express.static(path.join(__dirname, "static/hiit/")));
 app.post('/connect/', (req, res) => {
     // create user with name and add them to room code
     console.log(req.body);
-    var roomName = req.body.rooomName;
+    if (roomData[req.room] != undefined)
+        if (roomData[req.room].user2 != undefined)
+            res.send("Only two people can use this workout adventure at any time!");
 });
 
 // app.get('/hiit/', (req, res) => {

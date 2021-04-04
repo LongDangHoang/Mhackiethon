@@ -60,7 +60,8 @@
             </div>
         </div>
     </div>
-    <div class="container-3 w-container"></div>
+    <div id='videoContainer' class="container-3 w-container">
+    </div>
     <footer id="footer" class="footer">
         <div class="w-container">
             <div class="footer-flex-container"><a href="#"
@@ -117,6 +118,9 @@
     <script src='/socket.io/socket.io.js'></script>
     <script type='text/javascript'>
 
+        const connect = Twilio.Video.connect;
+        const createLocalTracks = Twilio.Video.createLocalTracks;
+
         var socket = io();
         var username;
         var roomName;
@@ -130,8 +134,6 @@
         var completeButton = document.getElementById("w-node-_6127cee6-3ab9-3aad-f652-c339ceede142-a20c2e40");
         var exerciseType = document.getElementById('Exercise-type');
 
-        // twilio calling
-
         // flag
         var waitFlag = false;
 
@@ -140,6 +142,7 @@
 
         form.onsubmit = (e) => {
             e.preventDefault(); // prevent reload
+            console.log("Something happening?");
             socket.emit("join room", {
                 username: form.elements.name.value,
                 roomName: form.elements.room.value
@@ -180,12 +183,36 @@
             var accToken = data.accToken;
             console.log(accToken);
             roomID = data.roomID;
-            Twilio.Video.connect(accToken, {
-                name: roomID,
-                audio: true,
-                video: true
-            }).then(room => console.log("Connected to room " + String(roomID)))
-              .catch(err => console.log("Fail to connect"));
+
+            // twilio calling
+            let audioOutputDevice;
+            let audioInput;
+            let videoInput;
+            // code from twilio site https://www.twilio.com/docs/video/configuring-audio-video-input-and-output-devices
+            navigator.mediaDevices.enumerateDevices().then(devices => {
+                audioInput = devices.find(device => device.kind === 'audioinput');
+                audioOutputDevice = devices.find(device => device.kind === 'audiooutput');
+                videoInput = devices.find(device => device.kind === 'videoinput');
+                return createLocalTracks({ audio: { deviceId: audioInput.deviceId }, video: { deviceId: videoInput.deviceId }});
+            }).then(localTracks => {
+                return connect(accToken, {
+                    name: roomID,
+                    tracks: localTracks
+                });
+            }).then(room => {
+                console.log("Connected to room " + String(roomID));
+                room.on('trackSubscribed', track => {
+                    if (track.kind === 'audio') {
+                        const audioElement = track.attach();
+                        audioElement.setSinkId(audioOutputDevice.deviceId).then(() => {
+                            document.body.appendChild(audioElement);
+                        });
+                    } else if (track.kind === 'video') {
+                        const videoElement = track.attach();
+                        document.getElementById('videoContainer').appendChild(videoElement);
+                    }
+                });
+            }).catch(err => console.log("Fail to connect"));
         });
 
         socket.on("start task", (data) => {
