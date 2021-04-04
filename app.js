@@ -98,6 +98,7 @@ io.on("connection", (socket) => {
         socket.join(newUser.roomName);
         if (startTask == true) {
         // initialize a twilio room video call            
+            console.log('Twilio is running');
             twilio.video.rooms.create({
                 uniqueName: thisRoom + String(Math.floor(Date.now() / 1000)),
                 type: 'go'
@@ -114,13 +115,19 @@ io.on("connection", (socket) => {
                     });
                     // record twilio room in socket room
                     roomData[thisRoom].roomID = room.sid;
-                });
 
-            io.to(thisRoom).emit('start task', {
-                taskNumber: roomData[thisRoom].taskNumber,
-                user1: roomData[thisRoom].user1,
-                user2: roomData[thisRoom].user2
+                    io.to(thisRoom).emit('start task', {
+                        taskNumber: roomData[thisRoom].taskNumber,
+                        user1: roomData[thisRoom].user1,
+                        user2: roomData[thisRoom].user2
+                    });
             });
+
+            // io.to(thisRoom).emit('start task', {
+            //     taskNumber: roomData[thisRoom].taskNumber,
+            //     user1: roomData[thisRoom].user1,
+            //     user2: roomData[thisRoom].user2
+            // });
         }
             
     });
@@ -161,23 +168,21 @@ io.on("connection", (socket) => {
 
     // end
     socket.on('end', (data) => {
-        removeUser(data.id);
-        socket.disconnect(0);
-        // roomData[roomName] = undefined;
-        delete roomData[data.roomName];
-        twilio.video.rooms(data.roomID)
-                    .update({status: 'completed'});
+        socket.disconnect();
     });
 
     socket.on('disconnect', () => {
         roomName = findRoom(socket.id);
+        if (roomName == undefined) {
+            console.log("roomName is undefined for some reason");
+        }
         console.log("User %s disconnects!", socket.id);
         if (roomData[roomName] != undefined) {
             twilio.video.rooms(roomData[roomName].roomID)
                         .update({status: 'completed'});
         } else {
             // roomData[roomName] = undefined;
-            delete roomData[data.roomName];
+            delete roomData[roomName];
         }
         removeUser(socket.id);
     });
