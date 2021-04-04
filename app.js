@@ -190,9 +190,18 @@ io.on("connection", (socket) => {
             twilio.video.rooms(roomData[roomName].roomID)
                         .update({status: 'completed'});
             delete roomData[roomName];
+            console.log('Room %s is deleted', roomName);
         }
     });
 
+});
+
+// for https. Code from https://stackoverflow.com/questions/24726779/using-https-on-heroku
+app.all('*', (req, res, next) => {
+    if (req.headers['x-forwarded-proto'] != 'https')
+        res.redirect('https://' + req.headers.host + req.url)
+    else
+        next() /* Continue to other routes if we're not redirecting */
 });
 
 app.get('/', (req, res) => {
@@ -218,7 +227,6 @@ app.post('/connect/', (req, res) => {
 app.post('/debug/', (req, res) => {
     console.log(req.body);
 });
-
 
 
 http.listen(process.env.PORT || 3000);
