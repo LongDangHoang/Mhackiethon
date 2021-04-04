@@ -1,11 +1,11 @@
-const progress = document.getElementById("progress");
-const prev = document.getElementById("prev");
-const next = document.getElementById("next");
-const circles = document.querySelectorAll(".circle");
+const progress = document.getElementById("statusBar-progress");
+var completeButton = document.getElementById("w-node-_6127cee6-3ab9-3aad-f652-c339ceede142-a20c2e40");
+console.log(completeButton);
+const circles = document.querySelectorAll(".statusBar-circle");
 
 let currentActive = 1;
 
-next.addEventListener("click", ()=>{
+completeButton.addEventListener("click", ()=>{
     currentActive++;
     
     if (currentActive > circles.length){
@@ -15,14 +15,14 @@ next.addEventListener("click", ()=>{
 });
 
 // THIS IS FOR USING THE PREV BUTTON
-prev.addEventListener("click", ()=>{
-    currentActive--;
+// prev.addEventListener("click", ()=>{
+//     currentActive--;
     
-    if (currentActive < 1){
-        currentActive = 1;
-    }
-    update();
-});
+//     if (currentActive < 1){
+//         currentActive = 1;
+//     }
+//     update();
+// });
 
 function update() {
     circles.forEach((circle, idx)=>{
@@ -38,15 +38,7 @@ function update() {
     console.log(actives.length,circles.length);
     progress.style.width = ((actives.length - 1) / (circles.length - 1))*100 + "%";
 
-    if (currentActive === 1){
-        prev.disabled = true;
-    } else if (currentActive === circles.length) {
-        next.disabled = true;
-    } else {
-        prev.disabled = false;
-        next.disabled = false;
-    }
-
 }
 
+update();
 

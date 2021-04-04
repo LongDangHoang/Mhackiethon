@@ -1,30 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,400;1,300&display=swap');
 
-:root {
+.statusBar {
     /* THE COLOUR FOR THE BAR */
-    --line-border-fill: #7787e6; 
-    --line-border-empty: #bdbdbd;
-}
-
-* {
     box-sizing: border-box;
 }
 
-body {
+
+.statusBar-body {
     background-color: #ffffff;
     font-family: "Mullish", sans-serif;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
     overflow: hidden;
     margin: 0;
+    z-index: -5;
     
 }
 
-h1 {
+.statusBar-h1 {
     color: #212121;
-    margin-bottom: 90px;
+    margin-bottom: 30px;
 
 }
 
@@ -48,46 +45,46 @@ h1 {
     color: #e27ed5;
 }
 
-.container{
+.statusBar-container{
     text-align: center;
 }
 
-.progress-container{
+.statusBar-progress-container{
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
     position: relative;
     margin-bottom: 30px;
     max-width: 100%;
     width: 350px;
+    z-index: 0;
 }
 
 
-.progress-container::before{
+.statusBar-progress-container::before{
     content: "";
-    background-color: var(--line-border-empty);
+    background-color: #bdbdbd;
     position: absolute;
     top: 50%;
     left: 0;
     transform: translateY(-50%);
     height:4px;
     width: 100%;
-    z-index: -1;
     transition:0.4s ease;
 }
 
-.progress {
-    background-color: var(--line-border-fill);
+.statusBar-progress {
+    background-color: #7787e6;
     position: absolute;
     top: 50%;
     left: 0;
     transform: translateY(-50%);
     height: 4px;
     width: 0%;
-    z-index: -1;
     transition:0.4s ease;
 }
 
-.circle{
+.statusBar-circle{
     background-color: #ffffff;
     color: #999;
     border-radius: 50%;
@@ -98,14 +95,15 @@ h1 {
     align-items: center;
     justify-content: center;
     transition: 0.4s ease;
+    z-index: 1;
 }
 
-.circle.active{
-    border-color: var(--line-border-fill)
+.statusBar-circle.active{
+    border-color: #7787e6
 }
 
-.btn{
-    background-color: var(--line-border-fill);
+.statusBar-btn{
+    background-color: #7787e6;
     color: #ffffff;
     border-radius: 6px;
     border: 0;
@@ -116,16 +114,16 @@ h1 {
     font-size: 14px;
 }
 
-.btn:focus{
+.statusBar-btn:focus{
     outline:0;
 }
 
-.btn:active{
+.statusBar-btn:active{
     transform:scale(0.97);
 }
 
-.btn:disabled{
-    background-color: var(--line-border-empty);
+.statusBar-btn:disabled{
+    background-color: #ffffff;
     cursor: not-allowed;
 }
 

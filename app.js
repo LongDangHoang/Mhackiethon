@@ -48,17 +48,6 @@ function createTwilioToken(username, roomName) {
 // const auth = firebase.auth();
 
 app.use(bodyParser.urlencoded());
-// app.use(upload.array());
-
-// set onClick of button to this for sign in
-// function signInWithGoogle() {
-//     const provider = new firebase.auth.GoogleAuthProvider();
-//     auth.signInWithPopup(provider);
-// }
-
-// function signOut() {
-//     auth.signOut();
-// }
 
 let thisRoom = "";
 let roomData = {};
@@ -106,9 +95,7 @@ io.on("connection", (socket) => {
             console.log('Twilio is running');
             twilio.video.rooms.create({
                 uniqueName: thisRoom + String(Math.floor(Date.now() / 1000)),
-                type: 'go',
-                statusCallback: '/debug/',
-                statusCallbackMethod: 'POST'
+                type: 'go'
             }).then(room => {
                     console.log("Room created: " + String(room.sid));
                     socket.emit('start call', {
@@ -197,12 +184,12 @@ io.on("connection", (socket) => {
 });
 
 // for https. Code from https://stackoverflow.com/questions/24726779/using-https-on-heroku
-app.all('*', (req, res, next) => {
-    if (req.headers['x-forwarded-proto'] != 'https')
-        res.redirect('https://' + req.headers.host + req.url)
-    else
-        next() /* Continue to other routes if we're not redirecting */
-});
+// app.all('*', (req, res, next) => {
+//     if (req.headers['x-forwarded-proto'] != 'https')
+//         res.redirect('https://' + req.headers.host + req.url)
+//     else
+//         next() /* Continue to other routes if we're not redirecting */
+// });
 
 app.get('/', (req, res) => {
     console.log('Account id for twilio is %s', twilioConfig.accSid);
@@ -222,10 +209,6 @@ app.post('/connect/', (req, res) => {
     if (roomData[req.room] != undefined)
         if (roomData[req.room].user2 != undefined)
             res.send("Only two people can use this workout adventure at any time!");
-});
-
-app.post('/debug/', (req, res) => {
-    console.log(req.body);
 });
 
 

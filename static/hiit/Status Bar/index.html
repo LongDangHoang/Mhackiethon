@@ -9,19 +9,22 @@
 </head>
 <body>
     
-<div class="container">
- <h1>Progress Bar</h1>
- <div class="progress-container">
-     <div class="progress" id="progress"></div>
-     <!--THIS SHOWS THE ICONS FOR THE LANGUAGES-->
-     <div class="circle active"><i class="fas fa-seedling"></i></div>
-     <div class="circle active"><i class="fas fa-walking"></i></div>
-     <div class="circle active"><i class="fas fa-burn"></i></div>
-     <div class="circle active"><i class="fas fa-heartbeat"></i></div>
+<div class='statusBar statusBar-body'>
+    <div class="statusBar-container">
+    <h1 class='statusBar-h1'>Progress Bar</h1>
+    <div class="statusBar-progress-container">
+        <div class="statusBar-progress" id="statusBar-progress"></div>
+        <!--THIS SHOWS THE ICONS FOR THE LANGUAGES-->
+        <div class="statusBar-circle active"><i class="fas fa-seedling"></i></div>
+        <div class="statusBar-circle active"><i class="fas fa-walking"></i></div>
+        <div class="statusBar-circle active"><i class="fas fa-burn"></i></div>
+        <div class="statusBar-circle active"><i class="fas fa-heartbeat"></i></div>
+    </div>
+    <!-- THIS SHOWS THE BUTTONS-->
+    <button class="statusBar-btn" id="next">Next</button>
+    </div>
 </div>
-<!-- THIS SHOWS THE BUTTONS-->
- <button class="btn" id="next">Next</button>
-</div>
+
 <script src="app.js"></script>
 </body>
 </html>

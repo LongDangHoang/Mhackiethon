@@ -13,7 +13,7 @@
     <meta name="viewport" content="width=device-width, intial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
     <title>Step Progress Bar | Javascript</title>
-    <link rel="stylesheet" href="styles.css"> 
+    <link rel="stylesheet" href="./Status Bar/styles.css"> 
 
     <meta content="HIIT" property="og:title">
     <meta content="HIIT" property="twitter:title">
@@ -30,7 +30,6 @@
     <link href="https://uploads-ssl.webflow.com/img/favicon.ico" rel="shortcut icon" type="image/x-icon">
     <link href="https://uploads-ssl.webflow.com/img/webclip.png" rel="apple-touch-icon"> 
 </head>
-
 <body>
     <header id="nav" class="sticky-nav">
         <nav class="w-container">
@@ -50,21 +49,19 @@
         <div class="container-2 w-container">
             <h1 class="heading-4">HIGH INTENSITY - HIIT</h1>
             
-            <div class= "bar-format">
-                <div class="container">
-                    <h1>Progress Bar</h1>
-                    <div class="progress-container">
-                        <div class="progress" id="progress"></div>
+            <div class="statusBar-body">
+                <div class="statusBar-container">
+                    <h1 class='statusBar-h1'>Progress</h1>
+                    <div class="statusBar-progress-container">
+                        <div class="statusBar-progress" id="statusBar-progress"></div>
                         <!--THIS SHOWS THE ICONS FOR THE LANGUAGES-->
-                        <div class="circle active"><i class="fas fa-seedling"></i></div>
-                        <div class="circle active"><i class="fas fa-walking"></i></div>
-                        <div class="circle active"><i class="fas fa-burn"></i></div>
-                        <div class="circle active"><i class="fas fa-heartbeat"></i></div>
+                        <div class="statusBar-circle"><i class="fas fa-seedling"></i></div>
+                        <div class="statusBar-circle"><i class="fas fa-walking"></i></div>
+                        <div class="statusBar-circle"><i class="fas fa-burn"></i></div>
+                        <div class="statusBar-circle"><i class="fas fa-heartbeat"></i></div>
                     </div>
                 <!-- THIS SHOWS THE BUTTONS-->
-                <button class="btn" id="next">Next</button>
                 </div>
-                <script src="app.js"></script>
             </div>
 
             <div class="w-layout-grid grid-2">
@@ -119,7 +116,7 @@
             </div>
             <div>Copyright © 2021 M&amp;M's Fitness Studio. All rights reserved.</div>
             <!-- MODAL LOGIN DIV -->
-            <div style='display: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgb(0,0,0); background-color: rgba(0, 0, 0, 0.4);'
+            <div style='display: block; position: fixed; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgb(0,0,0); background-color: rgba(0, 0, 0, 0.4); z-index: 100'
                 id='modalLogin'>
                 <div style='display: flex; align-content: center; justify-content: center; background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%'>
                     <form action='/connect/' method='POST' id='loginForm'>
@@ -144,6 +141,7 @@
             src="./HIIT_files/webflow-badge-icon.f67cd735e3.svg" alt="" style="margin-right: 8px; width: 16px;"><img
             src="./HIIT_files/webflow-badge-text.6faa6a38cd.svg" alt="Made in Webflow"></a>
     <script src='/socket.io/socket.io.js'></script>
+    <!-- Sync script -->
     <script type='text/javascript'>
 
         const connect = Twilio.Video.connect;
@@ -163,7 +161,7 @@
         var exerciseType = document.getElementById('Exercise-type');
 
         // flag
-        var waitFlag = false;
+        var waitFlag = true;
 
         // hard code task value
         var tasks = ['20 Mountain Climbers', '3 High Plank Chest Taps (15 on each side)', '20 Squat Jumps', '30 Jumping Lunges (15 on each leg)'];
@@ -247,6 +245,7 @@
             // reset flag
             waitFlag = false;
             completeButton.innerHTML = 'COMPLETE';
+            updateProgressBar();
 
             // display user2 name and status
             console.log(data.user1);
@@ -266,6 +265,7 @@
         });
 
         socket.on("all complete", () => {
+            updateProgressBar();
             friendStatus.innerHTML = 'I HAVE COMPLETED!';
             exerciseType.innerHTML = 'Congratulations! You completed the exercise! You burn 9999 calories!';
             socket.emit('end', {
@@ -274,8 +274,30 @@
                 roomID: roomID,
                 roomName: roomName
             });
+
         });
 
+        // status bar script
+        const progress = document.getElementById("statusBar-progress");
+        const circles = document.querySelectorAll(".statusBar-circle");
+
+        let currentActive = 0;
+
+        function updateProgressBar() {
+            currentActive += 1;
+            circles.forEach((circle, idx)=>{
+                if (idx < currentActive) {
+                    circle.classList.add("active");
+                } else{
+                    circle.classList.remove("active");
+                }
+            });
+
+            const actives = document.querySelectorAll(".active");
+
+            console.log(actives.length,circles.length);
+            progress.style.width = ((actives.length - 1) / (circles.length - 1))*100 + "%";
+        }
     </script>
 </body>
 
